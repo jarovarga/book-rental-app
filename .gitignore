@@ -1,0 +1,60 @@
+# Laravel specific files #
+##########################
+.env
+.env.*.php
+.php-cs-fixer.cache
+.phpunit.result.cache
+composer.lock
+
+!/storage/app/public/.gitignore
+/node_modules/
+/public/css/*.css
+/public/hot
+/public/js/*.js
+/public/mix-manifest.json
+/public/storage
+/storage/*.key
+/storage/app/public/
+/storage/debugbar/
+/storage/framework/cache/
+/storage/framework/sessions/
+/storage/framework/views/
+/storage/logs/
+/vendor/
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+.Spotlight-V100
+.Trashes
+._*
+.directory
+Icon?
+Thumbs.db
+ehthumbs.db
+
+# Tool specific files #
+#######################
+# Vim
+*~
+*.swo
+*.swp
+# Sublime Text & TextMate
+*.stTheme.cache
+*.sublime-*
+*.tmPreferences.cache
+*.tmlanguage.cache
+# Eclipse
+.settings/
+# JetBrains aka PhpStorm
+.idea/
+# NetBeans
+nbproject/
+# Visual Studio Code
+.vscode/
+# devenv
+.devenv*
+.direnv
+devenv.local.nix
+devenv.lock
