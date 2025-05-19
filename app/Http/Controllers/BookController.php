@@ -42,16 +42,24 @@ class BookController extends Controller
     }
 
     /**
-     * Display a listing of all books.
-     * Shows books with their associated author information.
+     * Display a listing of books along with their authors.
+     * Fetches all books and authors to be displayed in the books index view.
      *
-     * @return View Returns the index view with books data
+     * @return View The view displaying the list of books and authors
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $books = $this->bookService->getAllBooks();
+        $filters = $request->only(['title', 'author_id', 'is_borrowed']);
 
-        return view('books.index', compact('books'));
+        if (empty(array_filter($filters))) {
+            $books = $this->bookService->getAllBooks();
+        } else {
+            $books = $this->bookService->getFilteredBooks($filters);
+        }
+
+        $authors = $this->authorService->getAllAuthors();
+
+        return view('books.index', compact('books', 'authors', 'filters'));
     }
 
     /**

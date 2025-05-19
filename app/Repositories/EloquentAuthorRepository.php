@@ -16,6 +16,27 @@ use Illuminate\Support\Collection;
 class EloquentAuthorRepository implements AuthorRepositoryInterface
 {
     /**
+     * Retrieve a collection of authors based on specified filters.
+     *
+     * @param array $filters An associative array of filters. Supported keys are 'name' and 'surname' for filtering author names and surnames.
+     * @return Collection A collection of authors, each including a count of their associated books.
+     */
+    public function getFiltered(array $filters = []): Collection
+    {
+        $query = Author::query();
+
+        if (!empty($filters['name'])) {
+            $query->where('name', 'like', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['surname'])) {
+            $query->where('surname', 'like', '%' . $filters['surname'] . '%');
+        }
+
+        return $query->withCount('books')->get();
+    }
+
+    /**
      * Retrieve all authors from the database.
      *
      * @return Collection<Author> Collection of Author models

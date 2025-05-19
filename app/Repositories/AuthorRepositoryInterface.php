@@ -16,6 +16,14 @@ use Illuminate\Support\Collection;
 interface AuthorRepositoryInterface
 {
     /**
+     * Retrieve a collection of records based on the provided filters.
+     *
+     * @param array $filters An associative array of filter criteria
+     * @return Collection A collection of filtered records
+     */
+    public function getFiltered(array $filters = []): Collection;
+
+    /**
      * Retrieve all authors from the repository.
      *
      * @return Collection Collection of author objects

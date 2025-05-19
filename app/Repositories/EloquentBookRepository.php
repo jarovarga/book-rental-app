@@ -17,6 +17,31 @@ use Illuminate\Support\Collection;
 class EloquentBookRepository implements BookRepositoryInterface
 {
     /**
+     * Retrieve a filtered collection of books based on the provided filters.
+     *
+     * @param array $filters An associative array of filters, supporting 'name' and 'surname' as keys
+     * @return Collection A collection of books matching the filters, with a count of related books
+     */
+    public function getFiltered(array $filters = []): Collection
+    {
+        $query = Book::with('author'); // eager load author relation
+
+        if (!empty($filters['title'])) {
+            $query->where('title', 'like', '%' . $filters['title'] . '%');
+        }
+
+        if (!empty($filters['author_id'])) {
+            $query->where('author_id', $filters['author_id']);
+        }
+
+        if (isset($filters['is_borrowed']) && $filters['is_borrowed'] !== '') {
+            $query->where('is_borrowed', $filters['is_borrowed']);
+        }
+
+        return $query->get();
+    }
+
+    /**
      * Retrieve all books from the database with their associated authors.
      * Eagerly loads the author relationship to prevent N+1 query problems.
      *

@@ -33,16 +33,23 @@ class AuthorController extends Controller
     }
 
     /**
-     * Display a listing of all authors.
-     * Shows authors with their book counts in the index view.
+     * Display a listing of authors.
+     * Retrieves authors with book counts or filtered based on provided criteria.
      *
-     * @return View Returns the index view with authors data
+     * @param Request $request The incoming HTTP request
+     * @return View The authors listing view with authors and filters data
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $authors = $this->authorService->getAllAuthorsWithBookCount();
+        $filters = $request->only(['name', 'surname']);
 
-        return view('authors.index', compact('authors'));
+        if (empty(array_filter($filters))) {
+            $authors = $this->authorService->getAllAuthorsWithBookCount();
+        } else {
+            $authors = $this->authorService->getFilteredAuthors($filters);
+        }
+
+        return view('authors.index', compact('authors', 'filters'));
     }
 
     /**

@@ -32,6 +32,17 @@ class AuthorService
     }
 
     /**
+     * Retrieve a collection of authors based on the provided filters.
+     *
+     * @param array $filters Optional filters to apply when retrieving authors
+     * @return Collection A collection of authors matching the specified filters
+     */
+    public function getFilteredAuthors(array $filters = []): Collection
+    {
+        return $this->authorRepo->getFiltered($filters);
+    }
+
+    /**
      * Retrieve all authors with their associated book counts.
      *
      * @return Collection Collection of authors with 'books_count' attribute

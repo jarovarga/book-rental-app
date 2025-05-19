@@ -32,6 +32,17 @@ class BookService
     }
 
     /**
+     * Retrieve a collection of books based on specified filters.
+     *
+     * @param array $filters Criteria to filter the books, defaults to an empty array
+     * @return Collection A collection of books matching the provided filters
+     */
+    public function getFilteredBooks(array $filters = []): Collection
+    {
+        return $this->bookRepo->getFiltered($filters);
+    }
+
+    /**
      * Retrieve all books from the system.
      * Returns books with their associated author information.
      *
