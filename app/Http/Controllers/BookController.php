@@ -1,126 +1,179 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Http\Controllers;
 
-use App\Models\Book;
-use App\Models\Author;
+use App\Services\BookService;
+use App\Services\AuthorService;
 use Illuminate\Http\Request;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class BookController
+ *
+ * Handles HTTP requests related to book management.
+ * Implements RESTful CRUD operations for books and manages book borrowing status.
+ * Integrates with both BookService and AuthorService for complete book management.
+ */
 class BookController extends Controller
 {
     /**
-     * Display a listing of books with author info and borrowed status.
+     * @var BookService Service layer handling book-related operations
      */
-    public function index(Request $request): View
+    protected BookService $bookService;
+
+    /**
+     * @var AuthorService Service layer handling author-related operations
+     */
+    protected AuthorService $authorService;
+
+    /**
+     * Initialize a controller with its required dependencies.
+     *
+     * @param BookService $bookService Service for book operations
+     * @param AuthorService $authorService Service for author operations
+     */
+    public function __construct(BookService $bookService, AuthorService $authorService)
     {
-        $query = Book::with('author');
+        $this->bookService = $bookService;
+        $this->authorService = $authorService;
+    }
 
-        if ($request->filled('author_id')) {
-            $query->where('author_id', $request['author_id']);
-        }
+    /**
+     * Display a listing of all books.
+     * Shows books with their associated author information.
+     *
+     * @return View Returns the index view with books data
+     */
+    public function index(): View
+    {
+        $books = $this->bookService->getAllBooks();
 
-        if ($request->filled('title')) {
-            $query->where('title', 'like', '%' . $request['title'] . '%');
-        }
-
-        if ($request->filled('is_borrowed')) {
-            $isBorrowed = $request['is_borrowed'] === '1';
-            $query->where('is_borrowed', $isBorrowed);
-        }
-
-        $books = $query->paginate(15)->withQueryString();
-
-        $authors = Author::orderBy('surname')->get();
-
-        return view('books.index', compact('books', 'authors'));
+        return view('books.index', compact('books'));
     }
 
     /**
      * Show the form for creating a new book.
+     * Includes a list of all available authors for selection.
+     *
+     * @return View Returns the creation form view with an author list
      */
     public function create(): View
     {
-        $authors = Author::orderBy('surname')->get();
+        $authors = $this->authorService->getAllAuthors();
 
         return view('books.create', compact('authors'));
     }
 
     /**
-     * Store a newly created book in storage.
+     * Store a newly created book in the database.
+     * Validates input data including author existence before creation.
+     *
+     * @param Request $request The incoming HTTP request
+     * @return RedirectResponse Redirects to index with a success message
      */
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'author_id' => ['required', 'exists:authors,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'is_borrowed' => ['nullable', 'boolean'],
+            'title' => 'required|string|max:255',
+            'author_id' => 'required|exists:authors,id',
+            'is_borrowed' => 'boolean',
         ]);
 
-        $validated['is_borrowed'] = $validated['is_borrowed'] ?? false;
+        $this->bookService->createBook($validated);
 
-        Book::create($validated);
-
-        return redirect()->route('books.index')->with('success', 'Book created successfully.');
+        return redirect()->route('books.index')
+            ->with('success', 'Book created successfully.');
     }
 
     /**
      * Display the specified book.
+     * Returns 404 if a book is not found.
+     *
+     * @param int $id The book's ID
+     * @return View Returns the show view with book data
      */
-    public function show(Book $book): View
+    public function show(int $id): View
     {
-        $book->load('author');
+        $book = $this->bookService->findBook($id);
+
+        if (!$book) {
+            abort(404);
+        }
 
         return view('books.show', compact('book'));
     }
 
     /**
      * Show the form for editing the specified book.
+     * Includes a list of all authors for selection.
+     * Returns 404 if a book is not found.
+     *
+     * @param int $id The book's ID
+     * @return View Returns the edit form view with book data and authors list
      */
-    public function edit(Book $book): View
+    public function edit(int $id): View
     {
-        $authors = Author::orderBy('surname')->get();
+        $book = $this->bookService->findBook($id);
+
+        if (!$book) {
+            abort(404);
+        }
+
+        $authors = $this->authorService->getAllAuthors();
 
         return view('books.edit', compact('book', 'authors'));
     }
 
     /**
-     * Update the specified book in storage.
+     * Update the specified book in the database.
+     * Validates input data including author existence before update.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param int $id The book's ID
+     * @return RedirectResponse Redirects to index with a success message
      */
-    public function update(Request $request, Book $book): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
         $validated = $request->validate([
-            'author_id' => ['required', 'exists:authors,id'],
-            'title' => ['required', 'string', 'max:255'],
-            'is_borrowed' => ['nullable', 'boolean'],
+            'title' => 'required|string|max:255',
+            'author_id' => 'required|exists:authors,id',
+            'is_borrowed' => 'boolean',
         ]);
 
-        $validated['is_borrowed'] = $validated['is_borrowed'] ?? false;
+        $this->bookService->updateBook($id, $validated);
 
-        $book->update($validated);
-
-        return redirect()->route('books.index')->with('success', 'Book updated successfully.');
+        return redirect()->route('books.index')
+            ->with('success', 'Book updated successfully.');
     }
 
     /**
-     * Remove the specified book from storage.
+     * Remove the specified book from the database.
+     *
+     * @param int $id The book's ID
+     * @return RedirectResponse Redirects to index with a success message
      */
-    public function destroy(Book $book): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
-        $book->delete();
+        $this->bookService->deleteBook($id);
 
-        return redirect()->route('books.index')->with('success', 'Book deleted successfully.');
+        return redirect()->route('books.index')
+            ->with('success', 'Book deleted successfully.');
     }
 
     /**
-     * Toggle the borrowed status of a book from the list.
+     * Toggle the borrowed status of a specific book.
+     * Switches between borrowed and available states.
+     *
+     * @param int $id The book's ID
+     * @return RedirectResponse Redirects to index with a success message
      */
-    public function toggleBorrowed(Book $book): RedirectResponse
+    public function toggleBorrowed(int $id): RedirectResponse
     {
-        $book['is_borrowed'] = !$book['is_borrowed'];
-        $book->save();
+        $this->bookService->toggleBorrowed($id);
 
-        return redirect()->route('books.index')->with('success', 'Book status updated.');
+        return redirect()->route('books.index')->with('success', 'Book borrow status toggled.');
     }
 }

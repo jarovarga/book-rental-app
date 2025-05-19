@@ -4,35 +4,51 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Models\Author;
-use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
+use App\Services\AuthorService;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 
+/**
+ * Class AuthorController
+ *
+ * Handles HTTP requests related to author management.
+ * Implements RESTful CRUD operations for authors with proper validation and response handling.
+ */
 class AuthorController extends Controller
 {
     /**
-     * Display a list of authors with book count.
+     * @var AuthorService Service layer handling author-related business logic
      */
-    public function index(Request $request): View
+    protected AuthorService $authorService;
+
+    /**
+     * Initialize a controller with its required dependencies.
+     *
+     * @param AuthorService $authorService The service handling author operations
+     */
+    public function __construct(AuthorService $authorService)
     {
-        $query = Author::withCount('books');
+        $this->authorService = $authorService;
+    }
 
-        if ($request->filled('name')) {
-            $query->where('name', 'like', '%' . $request['name'] . '%');
-        }
-
-        if ($request->filled('surname')) {
-            $query->where('surname', 'like', '%' . $request['surname'] . '%');
-        }
-
-        $authors = $query->orderBy('surname')->get();
+    /**
+     * Display a listing of all authors.
+     * Shows authors with their book counts in the index view.
+     *
+     * @return View Returns the index view with authors data
+     */
+    public function index(): View
+    {
+        $authors = $this->authorService->getAllAuthorsWithBookCount();
 
         return view('authors.index', compact('authors'));
     }
 
     /**
-     * Show the form to create a new author.
+     * Show the form for creating a new author.
+     *
+     * @return View Returns the creation form view
      */
     public function create(): View
     {
@@ -40,7 +56,11 @@ class AuthorController extends Controller
     }
 
     /**
-     * Store a newly created author.
+     * Store a newly created author in the database.
+     * Validates input data before creation.
+     *
+     * @param Request $request The incoming HTTP request
+     * @return RedirectResponse Redirects to index with a success message
      */
     public function store(Request $request): RedirectResponse
     {
@@ -49,58 +69,82 @@ class AuthorController extends Controller
             'surname' => 'required|string|max:255',
         ]);
 
-        Author::create($validated);
+        $this->authorService->createAuthor($validated);
 
-        return redirect()->route('authors.index')->with('success', 'Author created successfully.');
+        return redirect()->route('authors.index')
+            ->with('success', 'Author created successfully.');
     }
 
     /**
-     * Display the specified author with book count.
+     * Display the specified author with additional details.
+     * Returns 404 if the author is not found.
+     *
+     * @param int $id The author's ID
+     * @return View Returns the show view with author data
      */
-    public function show(Author $author): View
+    public function show(int $id): View
     {
+        $author = $this->authorService->findAuthor($id);
+
+        if (!$author) {
+            abort(404);
+        }
+
         $author->loadCount('books');
 
         return view('authors.show', compact('author'));
     }
 
     /**
-     * Show form to edit an existing author.
+     * Show the form for editing the specified author.
+     * Returns 404 if the author is not found.
+     *
+     * @param int $id The author's ID
+     * @return View Returns the edit form view with author data
      */
-    public function edit(Author $author): View
+    public function edit(int $id): View
     {
+        $author = $this->authorService->findAuthor($id);
+
+        if (!$author) {
+            abort(404);
+        }
+
         return view('authors.edit', compact('author'));
     }
 
     /**
-     * Update the specified author.
+     * Update the specified author in the database.
+     * Validates input data before update.
+     *
+     * @param Request $request The incoming HTTP request
+     * @param int $id The author's ID
+     * @return RedirectResponse Redirects to index with a success message
      */
-    public function update(Request $request, Author $author): RedirectResponse
+    public function update(Request $request, int $id): RedirectResponse
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
         ]);
 
-        $author->update($validated);
+        $this->authorService->updateAuthor($id, $validated);
 
-        return redirect()->route('authors.index')->with('success', 'Author updated successfully.');
+        return redirect()->route('authors.index')
+            ->with('success', 'Author updated successfully.');
     }
 
     /**
-     * Delete the specified author (only if no books are assigned).
+     * Remove the specified author from the database.
+     *
+     * @param int $id The author's ID
+     * @return RedirectResponse Redirects to index with a success message
      */
-    public function destroy(Author $author): RedirectResponse
+    public function destroy(int $id): RedirectResponse
     {
-        $author->loadCount('books');
+        $this->authorService->deleteAuthor($id);
 
-        if ($author['books_count'] > 0) {
-            return redirect()->route('authors.index')
-                ->with('error', 'Author cannot be deleted because they have associated books.');
-        }
-
-        $author->delete();
-
-        return redirect()->route('authors.index')->with('success', 'Author deleted successfully.');
+        return redirect()->route('authors.index')
+            ->with('success', 'Author deleted successfully.');
     }
 }
