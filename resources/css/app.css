@@ -9,3 +9,45 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Global styles for Vue.js frontend */
+body {
+    font-family: var(--font-sans);
+    background-color: #f8f9fa;
+}
+
+/* Custom styles for the app */
+.app {
+    min-height: 100vh;
+}
+
+/* Add some spacing to the bottom of the page */
+main.container {
+    padding-bottom: 2rem;
+}
+
+/* Style for badges */
+.badge {
+    font-size: 0.8rem;
+    padding: 0.35em 0.65em;
+}
+
+/* Add some spacing between buttons */
+.btn + .btn,
+.btn + form,
+form + .btn,
+form + form {
+    margin-left: 0.5rem;
+}
+
+/* Style for form controls */
+.form-control:focus,
+.form-select:focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Style for table hover */
+.table-hover tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.075);
+}

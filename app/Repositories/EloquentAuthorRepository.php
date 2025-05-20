@@ -54,7 +54,7 @@ class EloquentAuthorRepository implements AuthorRepositoryInterface
      */
     public function find(int $id): ?Author
     {
-        return Author::find($id);
+        return Author::with('books')->find($id);
     }
 
     /**

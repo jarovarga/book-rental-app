@@ -66,7 +66,7 @@ interface BookRepositoryInterface
      * Toggle the borrowed status of a book.
      *
      * @param int $id The unique identifier of the book
-     * @return bool True if the status was toggled successfully, false otherwise
+     * @return object|null The updated book object if successful, null otherwise
      */
-    public function toggleBorrowed(int $id): bool;
+    public function toggleBorrowed(int $id): ?object;
 }
