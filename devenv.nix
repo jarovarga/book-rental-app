@@ -68,5 +68,6 @@ in
 
   processes = {
     server.exec = "php -S localhost:9876 -t public/";
+    vite.exec = "npm run dev";
   };
 }

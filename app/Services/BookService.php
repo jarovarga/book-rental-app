@@ -103,9 +103,9 @@ class BookService
      * Changes the book's borrowed status from available to borrow or vice versa.
      *
      * @param int $id The unique identifier of the book
-     * @return bool True if the status was successfully toggled, false otherwise
+     * @return object|null The updated book object if successful, null otherwise
      */
-    public function toggleBorrowed(int $id): bool
+    public function toggleBorrowed(int $id): ?object
     {
         return $this->bookRepo->toggleBorrowed($id);
     }

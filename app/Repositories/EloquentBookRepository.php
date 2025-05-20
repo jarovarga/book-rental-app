@@ -60,7 +60,7 @@ class EloquentBookRepository implements BookRepositoryInterface
      */
     public function find(int $id): ?Book
     {
-        return Book::find($id);
+        return Book::with('author')->find($id);
     }
 
     /**
@@ -110,16 +110,20 @@ class EloquentBookRepository implements BookRepositoryInterface
      * Switches the is_borrowed flag between true and false.
      *
      * @param int $id The unique identifier of the book
-     * @return bool True if the status was toggled successfully, false if a book not found or save failed
+     * @return Book|null The updated Book model if successful, null if a book not found or save failed
      */
-    public function toggleBorrowed(int $id): bool
+    public function toggleBorrowed(int $id): ?Book
     {
         $book = $this->find($id);
 
-        if (!$book) return false;
+        if (!$book) return null;
 
         $book['is_borrowed'] = !$book['is_borrowed'];
 
-        return $book->save();
+        if ($book->save()) {
+            return $book->fresh('author');
+        }
+
+        return null;
     }
 }
