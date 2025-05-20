@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Author Details')
+
 @section('content')
     <div class="container">
         <h1>Author Details</h1>
@@ -11,6 +13,7 @@
             </div>
         </div>
 
-        <a href="{{ route('authors.index') }}" class="btn btn-secondary">Back to Authors List</a>
+        <a href="{{ route('authors.index') }}" class="btn btn-secondary">Back to List</a>
+        <a href="{{ route('authors.edit', $author) }}" class="btn btn-warning">Edit</a>
     </div>
 @endsection
