@@ -5,6 +5,7 @@
 .php-cs-fixer.cache
 .phpunit.result.cache
 composer.lock
+package-lock.json
 
 !/storage/app/public/.gitignore
 /node_modules/
