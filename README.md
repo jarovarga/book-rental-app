@@ -1,6 +1,6 @@
 # Book Rental Application
 
-A Laravel-based web application for managing a book rental system. This application allows users to manage books and authors and track the borrowed status of books.
+A modern web application for managing a book rental system, built with Laravel and Vue.js. This single-page application (SPA) allows users to manage books and authors and track the borrowed status of books.
 
 ## Features
 
@@ -8,18 +8,27 @@ A Laravel-based web application for managing a book rental system. This applicat
   - Create, view, edit, and delete books
   - Filter books by title, author, and borrowed status
   - Toggle borrowed status of books
+  - Real-time UI updates when changing book status
 
 - **Author Management**
   - Create, view, edit, and delete authors
-  - Filter authors by name and surname
   - View book count for each author
+  - Browse books by author
   - Prevent deletion of authors with associated books
 
 ## Technology Stack
 
-- **Framework**: Laravel
-- **Database**: MySQL
-- **Frontend**: Blade templates, Bootstrap
+- **Backend**: 
+  - Laravel (PHP framework)
+  - MySQL database
+  - RESTful API architecture
+
+- **Frontend**: 
+  - Vue.js 3 (JavaScript framework)
+  - Vue Router (for client-side routing)
+  - Pinia (for state management)
+  - Bootstrap 5 (for styling)
+  - Axios (for API requests)
 
 ## Installation
 
@@ -58,15 +67,17 @@ A Laravel-based web application for managing a book rental system. This applicat
    php artisan migrate
    ```
 
-6. Compile assets:
+6. Start the Laravel development server:
+   ```bash
+   php artisan serve
+   ```
+
+7. In a separate terminal, start the Vite development server for the Vue.js frontend:
    ```bash
    npm run dev
    ```
 
-7. Start the development server:
-   ```bash
-   php artisan serve
-   ```
+8. Access the application at http://localhost:8000
 
 ### Option 2: Installation with devenv.nix
 
@@ -87,7 +98,8 @@ If you have [Nix](https://devenv.sh/getting-started/) installed, you can use dev
    - Install MariaDB and create a database
    - Install Node.js 20
    - Run `composer install` and `npm install`
-   - Start a development server on http://localhost:9876
+   - Start the Laravel server on http://localhost:9876
+   - Start the Vite development server for the Vue.js frontend
 
 3. Configure your database in the `.env` file to use the devenv database:
    ```
@@ -105,30 +117,55 @@ If you have [Nix](https://devenv.sh/getting-started/) installed, you can use dev
    php artisan migrate
    ```
 
-5. Compile assets:
-   ```bash
-   devenv shell
-   npm run dev
-   ```
-
-Note: The development server is automatically started at http://localhost:9876
+5. Access the application at http://localhost:9876
 
 ## Usage
 
-1. **Managing Books**
-   - Navigate to `/books` to view all books
-   - Use the filter options to search for specific books
-   - Click on a book to view details
-   - Use the "Add Book" button to create a new book
-   - Use the "Edit" and "Delete" buttons to modify or remove books
-   - Toggle the borrowed status using the dedicated button
+The application is a Single Page Application (SPA) with client-side routing. Once loaded, navigation between pages happens without full page reloads.
 
-2. **Managing Authors**
-   - Navigate to `/authors` to view all authors
-   - Use the filter options to search for specific authors
-   - Click on an author to view details
-   - Use the "Add Author" button to create a new author
+1. **Home Page**
+   - The landing page provides quick access to both Books and Authors management
+
+2. **Managing Books**
+   - Click on "Books" in the navigation bar to view all books
+   - Use the filter form to search by title, author, or borrowed status
+   - Click on a book title or the "View" button to see details
+   - Use the "Add New Book" button to create a new book
+   - Use the "Edit" and "Delete" buttons to modify or remove books
+   - Toggle the borrowed status using the "Available/Borrowed" button (changes color based on status)
+
+3. **Managing Authors**
+   - Click on "Authors" in the navigation bar to view all authors
+   - Each author shows their book count
+   - Click on an author name or the "View" button to see details and their books
+   - Use the "Add New Author" button to create a new author
    - Use the "Edit" and "Delete" buttons to modify or remove authors
+   - Authors with associated books cannot be deleted (system will show an error message)
+
+4. **API Endpoints**
+   - The application provides a RESTful API at `/api`:
+     - `/api/books` - CRUD operations for books
+     - `/api/books/{id}/toggle-borrowed` - Toggle borrowed status
+     - `/api/authors` - CRUD operations for authors
+
+## Development
+
+### Frontend Development
+
+The Vue.js frontend is built with Vite. To make changes to the frontend:
+
+1. Modify the components in `resources/js/components/`
+2. Run `npm run dev` to see changes in real-time
+3. Run `npm run build` for production builds
+
+### Backend Development
+
+The Laravel backend follows a service-repository pattern:
+
+- Controllers: `app/Http/Controllers/Api/`
+- Services: `app/Services/`
+- Repositories: `app/Repositories/`
+- Models: `app/Models/`
 
 ## License
 
